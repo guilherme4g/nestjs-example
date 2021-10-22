@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum visualizationType {
+  public 
+  subscribed_only
+  guests_only
+}
+
+model Event {
+  id              String              @id @db.Uuid @default(uuid())
+  name            String
+  startDate       DateTime
+  endDate         DateTime
+  sinopsis        String
+  visualization   visualizationType   @default(public)
+  slug            String
+  isFeatured      Boolean             @map("is_featured")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  categories      CategoriesOnEvents[]
+}
+
+model Category {
+  id              String              @id @db.Uuid @default(uuid())
+  name            String
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  events          CategoriesOnEvents[]
+}
+
+model CategoriesOnEvents {
+  event           Event     @relation(fields: [eventId], references: [id])
+  eventId         String    @db.Uuid// relation scalar field (used in the `@relation` attribute above)
+  category        Category  @relation(fields: [categoryId], references: [id])
+  categoryId      String    @db.Uuid// relation scalar field (used in the `@relation` attribute above)
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  @@id([eventId, categoryId])
+}
+
+
+
+
